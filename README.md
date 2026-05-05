@@ -32,6 +32,7 @@ The server listens on `http://localhost:3000` (override with `PORT`).
 | ------ | --------- | -------------------------------------- | -------- |
 | GET    | `/health` | Liveness probe -> `{ "status": "ok" }` | PR #0    |
 | GET    | `/todos`  | List all todos (array)                 | PR #1    |
+| POST   | `/todos`  | Create todo `{ title }` -> 201         | PR #2    |
 
 ## Pipelines
 
