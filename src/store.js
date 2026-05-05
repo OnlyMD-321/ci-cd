@@ -11,9 +11,13 @@ function create({ title }) {
   return todo;
 }
 
+function get(id) {
+  return items.get(id);
+}
+
 function clear() {
   items.clear();
   nextId = 1;
 }
 
-module.exports = { list, create, clear };
+module.exports = { list, create, get, clear };

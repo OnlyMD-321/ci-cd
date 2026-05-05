@@ -52,3 +52,24 @@ describe('POST /todos', () => {
     expect(res.body.map((t) => t.title)).toEqual(['a', 'b']);
   });
 });
+
+describe('GET /todos/:id', () => {
+  it('returns the todo when it exists', async () => {
+    const app = createApp();
+    const created = await request(app).post('/todos').send({ title: 'buy milk' });
+    const res = await request(app).get(`/todos/${created.body.id}`);
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual(created.body);
+  });
+
+  it('returns 404 when the id does not exist', async () => {
+    const res = await request(createApp()).get('/todos/999');
+    expect(res.status).toBe(404);
+    expect(res.body).toHaveProperty('error');
+  });
+
+  it('returns 404 when the id is not a number', async () => {
+    const res = await request(createApp()).get('/todos/abc');
+    expect(res.status).toBe(404);
+  });
+});
