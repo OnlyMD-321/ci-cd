@@ -23,9 +23,13 @@ function update(id, { title, done }) {
   return todo;
 }
 
+function remove(id) {
+  return items.delete(id);
+}
+
 function clear() {
   items.clear();
   nextId = 1;
 }
 
-module.exports = { list, create, get, update, clear };
+module.exports = { list, create, get, update, remove, clear };

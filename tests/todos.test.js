@@ -113,3 +113,26 @@ describe('PUT /todos/:id', () => {
     expect(res.status).toBe(400);
   });
 });
+
+describe('DELETE /todos/:id', () => {
+  it('removes the todo and returns 204', async () => {
+    const app = createApp();
+    const created = await request(app).post('/todos').send({ title: 'a' });
+    const res = await request(app).delete(`/todos/${created.body.id}`);
+    expect(res.status).toBe(204);
+    expect(res.body).toEqual({});
+  });
+
+  it('makes the todo no longer reachable via GET /todos/:id', async () => {
+    const app = createApp();
+    const created = await request(app).post('/todos').send({ title: 'a' });
+    await request(app).delete(`/todos/${created.body.id}`);
+    const res = await request(app).get(`/todos/${created.body.id}`);
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 404 when the id does not exist', async () => {
+    const res = await request(createApp()).delete('/todos/999');
+    expect(res.status).toBe(404);
+  });
+});

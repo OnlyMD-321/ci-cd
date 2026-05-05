@@ -41,4 +41,13 @@ router.put('/:id', (req, res) => {
   return res.json(updated);
 });
 
+router.delete('/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const removed = store.remove(id);
+  if (!removed) {
+    return res.status(404).json({ error: 'todo not found' });
+  }
+  return res.status(204).end();
+});
+
 module.exports = router;
