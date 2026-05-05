@@ -15,9 +15,17 @@ function get(id) {
   return items.get(id);
 }
 
+function update(id, { title, done }) {
+  const todo = items.get(id);
+  if (!todo) return undefined;
+  todo.title = title;
+  todo.done = done;
+  return todo;
+}
+
 function clear() {
   items.clear();
   nextId = 1;
 }
 
-module.exports = { list, create, get, clear };
+module.exports = { list, create, get, update, clear };

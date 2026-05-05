@@ -28,12 +28,13 @@ The server listens on `http://localhost:3000` (override with `PORT`).
 
 ## Endpoints
 
-| Method | Path         | Purpose                                | Added in |
-| ------ | ------------ | -------------------------------------- | -------- |
-| GET    | `/health`    | Liveness probe -> `{ "status": "ok" }` | PR #0    |
-| GET    | `/todos`     | List all todos (array)                 | PR #1    |
-| POST   | `/todos`     | Create todo `{ title }` -> 201         | PR #2    |
-| GET    | `/todos/:id` | Get one by id -> 200 or 404            | PR #3    |
+| Method | Path         | Purpose                                  | Added in |
+| ------ | ------------ | ---------------------------------------- | -------- |
+| GET    | `/health`    | Liveness probe -> `{ "status": "ok" }`   | PR #0    |
+| GET    | `/todos`     | List all todos (array)                   | PR #1    |
+| POST   | `/todos`     | Create todo `{ title }` -> 201           | PR #2    |
+| GET    | `/todos/:id` | Get one by id -> 200 or 404              | PR #3    |
+| PUT    | `/todos/:id` | Replace `{ title, done }` -> 200/400/404 | PR #4    |
 
 ## Pipelines
 

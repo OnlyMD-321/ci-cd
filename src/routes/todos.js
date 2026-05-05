@@ -25,4 +25,20 @@ router.get('/:id', (req, res) => {
   return res.json(todo);
 });
 
+router.put('/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const { title, done } = req.body;
+  if (typeof title !== 'string' || title.trim() === '') {
+    return res.status(400).json({ error: 'title is required and must be a non-empty string' });
+  }
+  if (typeof done !== 'boolean') {
+    return res.status(400).json({ error: 'done must be a boolean' });
+  }
+  const updated = store.update(id, { title: title.trim(), done });
+  if (!updated) {
+    return res.status(404).json({ error: 'todo not found' });
+  }
+  return res.json(updated);
+});
+
 module.exports = router;

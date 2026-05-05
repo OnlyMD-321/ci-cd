@@ -73,3 +73,43 @@ describe('GET /todos/:id', () => {
     expect(res.status).toBe(404);
   });
 });
+
+describe('PUT /todos/:id', () => {
+  it('updates title and done, returns 200', async () => {
+    const app = createApp();
+    const created = await request(app).post('/todos').send({ title: 'a' });
+    const res = await request(app)
+      .put(`/todos/${created.body.id}`)
+      .send({ title: 'b', done: true });
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ id: created.body.id, title: 'b', done: true });
+  });
+
+  it('persists the update for subsequent GETs', async () => {
+    const app = createApp();
+    const created = await request(app).post('/todos').send({ title: 'a' });
+    await request(app).put(`/todos/${created.body.id}`).send({ title: 'b', done: true });
+    const res = await request(app).get(`/todos/${created.body.id}`);
+    expect(res.body).toEqual({ id: created.body.id, title: 'b', done: true });
+  });
+
+  it('returns 404 when the id does not exist', async () => {
+    const res = await request(createApp()).put('/todos/999').send({ title: 'b', done: true });
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 400 when title is missing', async () => {
+    const res = await request(createApp()).put('/todos/1').send({ done: true });
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when title is empty', async () => {
+    const res = await request(createApp()).put('/todos/1').send({ title: '   ', done: true });
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when done is not a boolean', async () => {
+    const res = await request(createApp()).put('/todos/1').send({ title: 'b', done: 'yes' });
+    expect(res.status).toBe(400);
+  });
+});
