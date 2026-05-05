@@ -27,9 +27,16 @@ function remove(id) {
   return items.delete(id);
 }
 
+function toggle(id) {
+  const todo = items.get(id);
+  if (!todo) return undefined;
+  todo.done = !todo.done;
+  return todo;
+}
+
 function clear() {
   items.clear();
   nextId = 1;
 }
 
-module.exports = { list, create, get, update, remove, clear };
+module.exports = { list, create, get, update, remove, toggle, clear };

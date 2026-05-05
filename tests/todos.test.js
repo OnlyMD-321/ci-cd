@@ -136,3 +136,26 @@ describe('DELETE /todos/:id', () => {
     expect(res.status).toBe(404);
   });
 });
+
+describe('PATCH /todos/:id/toggle', () => {
+  it('flips done from false to true', async () => {
+    const app = createApp();
+    const created = await request(app).post('/todos').send({ title: 'a' });
+    const res = await request(app).patch(`/todos/${created.body.id}/toggle`);
+    expect(res.status).toBe(200);
+    expect(res.body.done).toBe(true);
+  });
+
+  it('flips done from true back to false on a second call', async () => {
+    const app = createApp();
+    const created = await request(app).post('/todos').send({ title: 'a' });
+    await request(app).patch(`/todos/${created.body.id}/toggle`);
+    const res = await request(app).patch(`/todos/${created.body.id}/toggle`);
+    expect(res.body.done).toBe(false);
+  });
+
+  it('returns 404 when the id does not exist', async () => {
+    const res = await request(createApp()).patch('/todos/999/toggle');
+    expect(res.status).toBe(404);
+  });
+});

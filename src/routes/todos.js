@@ -50,4 +50,13 @@ router.delete('/:id', (req, res) => {
   return res.status(204).end();
 });
 
+router.patch('/:id/toggle', (req, res) => {
+  const id = Number(req.params.id);
+  const todo = store.toggle(id);
+  if (!todo) {
+    return res.status(404).json({ error: 'todo not found' });
+  }
+  return res.json(todo);
+});
+
 module.exports = router;
