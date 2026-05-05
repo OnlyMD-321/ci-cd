@@ -10,6 +10,31 @@ describe('GET /todos', () => {
     expect(res.status).toBe(200);
     expect(res.body).toEqual([]);
   });
+
+  it('?done=true returns only completed todos', async () => {
+    const app = createApp();
+    const a = await request(app).post('/todos').send({ title: 'a' });
+    await request(app).post('/todos').send({ title: 'b' });
+    await request(app).patch(`/todos/${a.body.id}/toggle`);
+    const res = await request(app).get('/todos?done=true');
+    expect(res.status).toBe(200);
+    expect(res.body.map((t) => t.title)).toEqual(['a']);
+  });
+
+  it('?done=false returns only pending todos', async () => {
+    const app = createApp();
+    const a = await request(app).post('/todos').send({ title: 'a' });
+    await request(app).post('/todos').send({ title: 'b' });
+    await request(app).patch(`/todos/${a.body.id}/toggle`);
+    const res = await request(app).get('/todos?done=false');
+    expect(res.body.map((t) => t.title)).toEqual(['b']);
+  });
+
+  it('returns 400 when done query is not "true" or "false"', async () => {
+    const res = await request(createApp()).get('/todos?done=yes');
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty('error');
+  });
 });
 
 describe('POST /todos', () => {

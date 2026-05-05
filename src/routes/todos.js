@@ -3,8 +3,16 @@ const store = require('../store');
 
 const router = express.Router();
 
-router.get('/', (_req, res) => {
-  res.json(store.list());
+router.get('/', (req, res) => {
+  const { done } = req.query;
+  if (done === undefined) {
+    return res.json(store.list());
+  }
+  if (done !== 'true' && done !== 'false') {
+    return res.status(400).json({ error: "query 'done' must be 'true' or 'false'" });
+  }
+  const wanted = done === 'true';
+  return res.json(store.list().filter((t) => t.done === wanted));
 });
 
 router.post('/', (req, res) => {
