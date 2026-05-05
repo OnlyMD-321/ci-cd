@@ -1,4 +1,5 @@
 const express = require('express');
+const todosRouter = require('./routes/todos');
 
 function createApp() {
   const app = express();
@@ -7,6 +8,8 @@ function createApp() {
   app.get('/health', (_req, res) => {
     res.json({ status: 'ok' });
   });
+
+  app.use('/todos', todosRouter);
 
   return app;
 }
