@@ -1,42 +1,40 @@
-const items = new Map();
-let nextId = 1;
+const db = require('./db');
+
+const row2todo = (r) => (r ? { id: r.id, title: r.title, done: r.done === 1 } : undefined);
 
 function list() {
-  return [...items.values()];
+  return db.prepare('SELECT * FROM todos ORDER BY id').all().map(row2todo);
 }
 
 function create({ title }) {
-  const todo = { id: nextId++, title, done: false };
-  items.set(todo.id, todo);
-  return todo;
+  const createdAt = new Date().toISOString();
+  const info = db.prepare('INSERT INTO todos (title, done, createdAt) VALUES (?, 0, ?)').run(title, createdAt);
+  return row2todo(db.prepare('SELECT * FROM todos WHERE id = ?').get(info.lastInsertRowid));
 }
 
 function get(id) {
-  return items.get(id);
+  return row2todo(db.prepare('SELECT * FROM todos WHERE id = ?').get(id));
 }
 
 function update(id, { title, done }) {
-  const todo = items.get(id);
-  if (!todo) return undefined;
-  todo.title = title;
-  todo.done = done;
-  return todo;
+  const info = db.prepare('UPDATE todos SET title = ?, done = ? WHERE id = ?').run(title, done ? 1 : 0, id);
+  if (info.changes === 0) return undefined;
+  return row2todo(db.prepare('SELECT * FROM todos WHERE id = ?').get(id));
 }
 
 function remove(id) {
-  return items.delete(id);
+  return db.prepare('DELETE FROM todos WHERE id = ?').run(id).changes > 0;
 }
 
 function toggle(id) {
-  const todo = items.get(id);
-  if (!todo) return undefined;
-  todo.done = !todo.done;
-  return todo;
+  const info = db.prepare('UPDATE todos SET done = 1 - done WHERE id = ?').run(id);
+  if (info.changes === 0) return undefined;
+  return row2todo(db.prepare('SELECT * FROM todos WHERE id = ?').get(id));
 }
 
 function clear() {
-  items.clear();
-  nextId = 1;
+  db.prepare('DELETE FROM todos').run();
+  db.prepare("DELETE FROM sqlite_sequence WHERE name = 'todos'").run();
 }
 
 module.exports = { list, create, get, update, remove, toggle, clear };
