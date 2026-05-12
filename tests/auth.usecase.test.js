@@ -41,7 +41,7 @@ describe('auth — use cases', () => {
       await request(app).post('/todos').set('Authorization', `Bearer ${a.body.token}`).send({ title: 'Alice task' });
       const res = await request(app).get('/todos').set('Authorization', `Bearer ${b.body.token}`);
       expect(res.status).toBe(200);
-      expect(res.body).toHaveLength(0);
+      expect(res.body.total).toBe(0);
     });
 
     it('login token grants the same access as register token', async () => {
@@ -49,7 +49,7 @@ describe('auth — use cases', () => {
       const login = await request(app).post('/auth/login').send({ username: 'alice', password: 'secret123' });
       await request(app).post('/todos').set('Authorization', `Bearer ${login.body.token}`).send({ title: 'task' });
       const res = await request(app).get('/todos').set('Authorization', `Bearer ${login.body.token}`);
-      expect(res.body).toHaveLength(1);
+      expect(res.body.total).toBe(1);
     });
   });
 });

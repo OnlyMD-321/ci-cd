@@ -17,14 +17,24 @@ function validateDueDate(d) {
 }
 
 router.get('/', (req, res) => {
-  const { done } = req.query;
+  const { done, search, page: pageStr, limit: limitStr } = req.query;
+
   if (done !== undefined && done !== 'true' && done !== 'false') {
     return res.status(400).json({ error: "query 'done' must be 'true' or 'false'" });
   }
-  const todos = store.list(req.user.id);
-  if (done === undefined) return res.json(todos);
-  const wanted = done === 'true';
-  return res.json(todos.filter((t) => t.done === wanted));
+
+  const page  = pageStr  !== undefined ? Number(pageStr)  : 1;
+  const limit = limitStr !== undefined ? Number(limitStr) : 10;
+
+  if (!Number.isInteger(page) || page < 1) {
+    return res.status(400).json({ error: "'page' must be a positive integer" });
+  }
+  if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
+    return res.status(400).json({ error: "'limit' must be an integer between 1 and 100" });
+  }
+
+  const doneFilter = done === undefined ? undefined : done === 'true';
+  return res.json(store.list(req.user.id, { search, done: doneFilter, page, limit }));
 });
 
 router.post('/', (req, res) => {

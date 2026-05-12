@@ -81,9 +81,9 @@ describe('rich-fields — use cases', () => {
       await request(app).post('/todos').set('Authorization', `Bearer ${token}`).send({ title: 'a', priority: 'low' });
       await request(app).post('/todos').set('Authorization', `Bearer ${token}`).send({ title: 'b', priority: 'high', dueDate: '2025-09-01' });
       const res = await request(app).get('/todos').set('Authorization', `Bearer ${token}`);
-      expect(res.body[0]).toHaveProperty('priority', 'low');
-      expect(res.body[1]).toHaveProperty('priority', 'high');
-      expect(res.body[1]).toHaveProperty('dueDate', '2025-09-01');
+      expect(res.body.data[0]).toHaveProperty('priority', 'low');
+      expect(res.body.data[1]).toHaveProperty('priority', 'high');
+      expect(res.body.data[1]).toHaveProperty('dueDate', '2025-09-01');
     });
   });
 });
