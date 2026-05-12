@@ -7,41 +7,73 @@ on:
     branches: [main, dev]
 
 jobs:
-  ci:
-    name: ci
+  # ── 1. Static analysis ──────────────────────────────────────────
+  lint-format:
+    name: Lint & Format
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
+      - run: npm ci
       - name: Format check
         run: npm run format:check
-
       - name: Lint
         run: npm run lint
 
-      - name: Test (with coverage)
-        run: npm test -- --coverage
-
-      - name: Build
-        run: npm run build
-
-      - name: Upload coverage report
+  # ── 2. Use-case tests (happy path) ──────────────────────────────
+  test-usecase:
+    name: Use-case tests
+    runs-on: ubuntu-latest
+    needs: lint-format
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Run use-case tests
+        run: npm test -- --testPathPattern="health|todos|usecase" --coverage --coverageReporters=text-summary
+      - name: Upload use-case coverage
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: coverage
+          name: coverage-usecase
           path: coverage/
 
-      - name: Upload build artifact
+  # ── 3. Failure tests (error / rejection paths) ──────────────────
+  test-failure:
+    name: Failure tests
+    runs-on: ubuntu-latest
+    needs: lint-format
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Run failure tests
+        run: npm test -- --testPathPattern="failure"
+
+  # ── 4. Build ────────────────────────────────────────────────────
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [test-usecase, test-failure]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Build bundle
+        run: npm run build
+      - name: Upload dist artifact
         uses: actions/upload-artifact@v4
         with:
           name: dist

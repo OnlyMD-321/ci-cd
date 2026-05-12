@@ -10,51 +10,75 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  ci:
-    name: ci
+  lint-format:
+    name: Lint & Format
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run lint
 
-      - name: Install dependencies
-        run: npm ci
+  test-usecase:
+    name: Use-case tests
+    runs-on: ubuntu-latest
+    needs: lint-format
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Run use-case tests
+        run: npm test -- --testPathPattern="health|todos|usecase" --coverage --coverageReporters=text-summary
 
-      - name: Format check
-        run: npm run format:check
+  test-failure:
+    name: Failure tests
+    runs-on: ubuntu-latest
+    needs: lint-format
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Run failure tests
+        run: npm test -- --testPathPattern="failure"
 
-      - name: Lint
-        run: npm run lint
-
-      - name: Test (with coverage)
-        run: npm test -- --coverage
-
-      - name: Build
-        run: npm run build
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [test-usecase, test-failure]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build
 
   promote:
-    name: promote dev to main
-    needs: ci
+    name: Promote dev → main
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: write
-
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Configure git identity
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-
       - name: Fast-forward main to dev
         run: |
           git fetch origin main dev
