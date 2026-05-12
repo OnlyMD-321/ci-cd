@@ -1,10 +1,22 @@
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const todosRouter = require('./routes/todos');
 const authRouter  = require('./routes/auth');
 const statsRouter = require('./routes/stats');
 
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: () => process.env.NODE_ENV === 'test',
+  handler: (_req, res) =>
+    res.status(429).json({ error: 'Too many requests', retryAfter: 15 * 60 }),
+});
+
 function createApp() {
   const app = express();
+  app.use(limiter);
   app.use(express.json());
 
   app.get('/health', (_req, res) => {
