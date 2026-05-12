@@ -13,8 +13,16 @@ const dbPath =
 const db = new Database(dbPath);
 
 db.exec(`
+  CREATE TABLE IF NOT EXISTS users (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    username     TEXT    NOT NULL UNIQUE,
+    passwordHash TEXT    NOT NULL,
+    createdAt    TEXT    NOT NULL
+  );
+
   CREATE TABLE IF NOT EXISTS todos (
     id        INTEGER PRIMARY KEY AUTOINCREMENT,
+    userId    INTEGER NOT NULL REFERENCES users(id),
     title     TEXT    NOT NULL,
     done      INTEGER NOT NULL DEFAULT 0,
     priority  TEXT    NOT NULL DEFAULT 'medium',
@@ -23,13 +31,10 @@ db.exec(`
   )
 `);
 
-// Migrate existing production DBs that predate rich-fields
-for (const col of ['priority', 'dueDate']) {
-  const exists = db.prepare(`SELECT COUNT(*) AS n FROM pragma_table_info('todos') WHERE name = ?`).get(col).n;
-  if (!exists) {
-    if (col === 'priority') db.exec(`ALTER TABLE todos ADD COLUMN priority TEXT NOT NULL DEFAULT 'medium'`);
-    if (col === 'dueDate')  db.exec(`ALTER TABLE todos ADD COLUMN dueDate TEXT`);
-  }
-}
+// Migrate existing production DBs
+const todoCols = db.prepare(`SELECT name FROM pragma_table_info('todos')`).all().map((r) => r.name);
+if (!todoCols.includes('priority')) db.exec(`ALTER TABLE todos ADD COLUMN priority TEXT NOT NULL DEFAULT 'medium'`);
+if (!todoCols.includes('dueDate'))  db.exec(`ALTER TABLE todos ADD COLUMN dueDate TEXT`);
+if (!todoCols.includes('userId'))   db.exec(`ALTER TABLE todos ADD COLUMN userId INTEGER`);
 
 module.exports = db;

@@ -1,7 +1,10 @@
 const express = require('express');
 const store = require('../store');
+const { requireAuth } = require('../middleware/auth');
 
 const router = express.Router();
+
+router.use(requireAuth);
 
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}(T[\d:.Z+-]+)?$/;
 
@@ -18,7 +21,7 @@ router.get('/', (req, res) => {
   if (done !== undefined && done !== 'true' && done !== 'false') {
     return res.status(400).json({ error: "query 'done' must be 'true' or 'false'" });
   }
-  const todos = store.list();
+  const todos = store.list(req.user.id);
   if (done === undefined) return res.json(todos);
   const wanted = done === 'true';
   return res.json(todos.filter((t) => t.done === wanted));
@@ -35,13 +38,13 @@ router.post('/', (req, res) => {
   if (!validateDueDate(dueDate)) {
     return res.status(400).json({ error: 'dueDate must be an ISO 8601 date string or null' });
   }
-  const todo = store.create({ title: title.trim(), priority, dueDate });
+  const todo = store.create({ title: title.trim(), priority, dueDate, userId: req.user.id });
   return res.status(201).json(todo);
 });
 
 router.get('/:id', (req, res) => {
   const id = Number(req.params.id);
-  const todo = store.get(id);
+  const todo = store.get(id, req.user.id);
   if (!todo) return res.status(404).json({ error: 'todo not found' });
   return res.json(todo);
 });
@@ -61,26 +64,25 @@ router.put('/:id', (req, res) => {
   if (!validateDueDate(dueDate)) {
     return res.status(400).json({ error: 'dueDate must be an ISO 8601 date string or null' });
   }
-  const updated = store.update(id, {
-    title: title.trim(),
-    done,
-    priority: priority ?? 'medium',
-    dueDate,
-  });
+  const updated = store.update(
+    id,
+    { title: title.trim(), done, priority: priority ?? 'medium', dueDate },
+    req.user.id,
+  );
   if (!updated) return res.status(404).json({ error: 'todo not found' });
   return res.json(updated);
 });
 
 router.delete('/:id', (req, res) => {
   const id = Number(req.params.id);
-  const removed = store.remove(id);
+  const removed = store.remove(id, req.user.id);
   if (!removed) return res.status(404).json({ error: 'todo not found' });
   return res.status(204).end();
 });
 
 router.patch('/:id/toggle', (req, res) => {
   const id = Number(req.params.id);
-  const todo = store.toggle(id);
+  const todo = store.toggle(id, req.user.id);
   if (!todo) return res.status(404).json({ error: 'todo not found' });
   return res.json(todo);
 });
