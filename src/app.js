@@ -1,8 +1,10 @@
-const express = require('express');
-const morgan  = require('morgan');
-const rfs     = require('rotating-file-stream');
-const path    = require('path');
-const fs      = require('fs');
+const express    = require('express');
+const swaggerUi  = require('swagger-ui-express');
+const yaml       = require('js-yaml');
+const morgan     = require('morgan');
+const rfs        = require('rotating-file-stream');
+const path       = require('path');
+const fs         = require('fs');
 const rateLimit = require('express-rate-limit');
 const todosRouter = require('./routes/todos');
 const authRouter  = require('./routes/auth');
@@ -18,6 +20,8 @@ function buildLogger() {
   }
   return morgan('dev');
 }
+
+const swaggerDoc = yaml.load(fs.readFileSync(path.join(__dirname, '..', 'openapi.yaml'), 'utf8'));
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -40,6 +44,7 @@ function createApp() {
     res.json({ status: 'ok' });
   });
 
+  app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc));
   app.use('/auth',  authRouter);
   app.use('/todos', todosRouter);
   app.use('/stats', statsRouter);
