@@ -1,5 +1,5 @@
 const request = require('supertest');
-const http    = require('http');
+const http = require('http');
 const { createApp, createIo } = require('../src/app');
 const store = require('../src/store');
 const { getToken } = require('./helpers/auth');
@@ -8,7 +8,7 @@ let app, server, token;
 
 beforeEach(async () => {
   store.clear();
-  app    = createApp();
+  app = createApp();
   server = http.createServer(app);
   createIo(server);
   await new Promise((r) => server.listen(0, r));
@@ -44,9 +44,16 @@ describe('websockets — use cases', () => {
     const { io: ioClient } = require('socket.io-client');
     const addr = server.address();
     const client = ioClient(`http://localhost:${addr.port}`);
-    client.once('todos:update', () => { client.disconnect(); done(); });
+    client.once('todos:update', () => {
+      client.disconnect();
+      done();
+    });
     client.once('connect', () => {
-      request(app).post('/todos').set(auth()).send({ title: 'ws test' }).end(() => {});
+      request(app)
+        .post('/todos')
+        .set(auth())
+        .send({ title: 'ws test' })
+        .end(() => {});
     });
   });
 });

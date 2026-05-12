@@ -5,10 +5,7 @@ const fs = require('fs');
 const dataDir = path.join(__dirname, '..', 'data');
 if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir);
 
-const dbPath =
-  process.env.NODE_ENV === 'test'
-    ? ':memory:'
-    : path.join(dataDir, 'todos.db');
+const dbPath = process.env.NODE_ENV === 'test' ? ':memory:' : path.join(dataDir, 'todos.db');
 
 const db = new Database(dbPath);
 
@@ -32,9 +29,13 @@ db.exec(`
 `);
 
 // Migrate existing production DBs
-const todoCols = db.prepare(`SELECT name FROM pragma_table_info('todos')`).all().map((r) => r.name);
-if (!todoCols.includes('priority')) db.exec(`ALTER TABLE todos ADD COLUMN priority TEXT NOT NULL DEFAULT 'medium'`);
-if (!todoCols.includes('dueDate'))  db.exec(`ALTER TABLE todos ADD COLUMN dueDate TEXT`);
-if (!todoCols.includes('userId'))   db.exec(`ALTER TABLE todos ADD COLUMN userId INTEGER`);
+const todoCols = db
+  .prepare(`SELECT name FROM pragma_table_info('todos')`)
+  .all()
+  .map((r) => r.name);
+if (!todoCols.includes('priority'))
+  db.exec(`ALTER TABLE todos ADD COLUMN priority TEXT NOT NULL DEFAULT 'medium'`);
+if (!todoCols.includes('dueDate')) db.exec(`ALTER TABLE todos ADD COLUMN dueDate TEXT`);
+if (!todoCols.includes('userId')) db.exec(`ALTER TABLE todos ADD COLUMN userId INTEGER`);
 
 module.exports = db;

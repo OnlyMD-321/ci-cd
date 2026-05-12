@@ -13,18 +13,25 @@ beforeEach(async () => {
 });
 
 const auth = () => ({ Authorization: `Bearer ${token}` });
-const post = (title, extra = {}) => request(app).post('/todos').set(auth()).send({ title, ...extra });
+const post = (title, extra = {}) =>
+  request(app)
+    .post('/todos')
+    .set(auth())
+    .send({ title, ...extra });
 
 describe('search & pagination — use cases', () => {
   describe('search', () => {
     it('returns all todos when no search param given', async () => {
-      await post('buy milk'); await post('read book');
+      await post('buy milk');
+      await post('read book');
       const res = await request(app).get('/todos').set(auth());
       expect(res.body.total).toBe(2);
     });
 
     it('filters todos by title substring (case-insensitive)', async () => {
-      await post('Buy Milk'); await post('read book'); await post('buy eggs');
+      await post('Buy Milk');
+      await post('read book');
+      await post('buy eggs');
       const res = await request(app).get('/todos?search=buy').set(auth());
       expect(res.body.total).toBe(2);
       expect(res.body.data.map((t) => t.title).sort()).toEqual(['Buy Milk', 'buy eggs'].sort());

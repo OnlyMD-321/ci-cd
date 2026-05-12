@@ -18,35 +18,35 @@ components:
     Todo:
       type: object
       properties:
-        id:        { type: integer }
-        title:     { type: string }
-        done:      { type: boolean }
-        priority:  { type: string, enum: [low, medium, high] }
-        dueDate:   { type: string, nullable: true, example: "2025-12-31" }
+        id: { type: integer }
+        title: { type: string }
+        done: { type: boolean }
+        priority: { type: string, enum: [low, medium, high] }
+        dueDate: { type: string, nullable: true, example: '2025-12-31' }
         createdAt: { type: string, format: date-time }
 
     PaginatedTodos:
       type: object
       properties:
-        data:  { type: array, items: { $ref: '#/components/schemas/Todo' } }
+        data: { type: array, items: { $ref: '#/components/schemas/Todo' } }
         total: { type: integer }
-        page:  { type: integer }
+        page: { type: integer }
         limit: { type: integer }
         pages: { type: integer }
 
     Stats:
       type: object
       properties:
-        total:   { type: integer }
-        done:    { type: integer }
+        total: { type: integer }
+        done: { type: integer }
         pending: { type: integer }
         overdue: { type: integer }
         byPriority:
           type: object
           properties:
-            low:    { type: integer }
+            low: { type: integer }
             medium: { type: integer }
-            high:   { type: integer }
+            high: { type: integer }
 
     Error:
       type: object
@@ -86,9 +86,22 @@ paths:
                 username: { type: string }
                 password: { type: string, minLength: 6 }
       responses:
-        '201': { description: User created, content: { application/json: { schema: { $ref: '#/components/schemas/TokenResponse' } } } }
-        '400': { description: Validation error, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
-        '409': { description: Username already taken, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+        '201':
+          {
+            description: User created,
+            content:
+              { application/json: { schema: { $ref: '#/components/schemas/TokenResponse' } } },
+          }
+        '400':
+          {
+            description: Validation error,
+            content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } },
+          }
+        '409':
+          {
+            description: Username already taken,
+            content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } },
+          }
 
   /auth/login:
     post:
@@ -104,22 +117,44 @@ paths:
                 username: { type: string }
                 password: { type: string }
       responses:
-        '200': { description: Login successful, content: { application/json: { schema: { $ref: '#/components/schemas/TokenResponse' } } } }
-        '401': { description: Invalid credentials, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+        '200':
+          {
+            description: Login successful,
+            content:
+              { application/json: { schema: { $ref: '#/components/schemas/TokenResponse' } } },
+          }
+        '401':
+          {
+            description: Invalid credentials,
+            content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } },
+          }
 
   /todos:
     get:
       summary: List todos (paginated, filterable)
       security: [{ bearerAuth: [] }]
       parameters:
-        - { name: done,   in: query, schema: { type: string, enum: [true, false] } }
+        - { name: done, in: query, schema: { type: string, enum: [true, false] } }
         - { name: search, in: query, schema: { type: string } }
-        - { name: page,   in: query, schema: { type: integer, default: 1 } }
-        - { name: limit,  in: query, schema: { type: integer, default: 10, maximum: 100 } }
+        - { name: page, in: query, schema: { type: integer, default: 1 } }
+        - { name: limit, in: query, schema: { type: integer, default: 10, maximum: 100 } }
       responses:
-        '200': { description: Paginated todo list, content: { application/json: { schema: { $ref: '#/components/schemas/PaginatedTodos' } } } }
-        '400': { description: Invalid query parameter, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
-        '401': { description: Unauthorized, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+        '200':
+          {
+            description: Paginated todo list,
+            content:
+              { application/json: { schema: { $ref: '#/components/schemas/PaginatedTodos' } } },
+          }
+        '400':
+          {
+            description: Invalid query parameter,
+            content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } },
+          }
+        '401':
+          {
+            description: Unauthorized,
+            content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } },
+          }
 
     post:
       summary: Create a todo
@@ -132,13 +167,25 @@ paths:
               type: object
               required: [title]
               properties:
-                title:    { type: string }
+                title: { type: string }
                 priority: { type: string, enum: [low, medium, high], default: medium }
-                dueDate:  { type: string, nullable: true }
+                dueDate: { type: string, nullable: true }
       responses:
-        '201': { description: Todo created, content: { application/json: { schema: { $ref: '#/components/schemas/Todo' } } } }
-        '400': { description: Validation error, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
-        '401': { description: Unauthorized, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+        '201':
+          {
+            description: Todo created,
+            content: { application/json: { schema: { $ref: '#/components/schemas/Todo' } } },
+          }
+        '400':
+          {
+            description: Validation error,
+            content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } },
+          }
+        '401':
+          {
+            description: Unauthorized,
+            content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } },
+          }
 
   /todos/{id}:
     parameters:
@@ -148,9 +195,21 @@ paths:
       summary: Get a single todo
       security: [{ bearerAuth: [] }]
       responses:
-        '200': { description: Todo found, content: { application/json: { schema: { $ref: '#/components/schemas/Todo' } } } }
-        '401': { description: Unauthorized, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
-        '404': { description: Not found, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+        '200':
+          {
+            description: Todo found,
+            content: { application/json: { schema: { $ref: '#/components/schemas/Todo' } } },
+          }
+        '401':
+          {
+            description: Unauthorized,
+            content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } },
+          }
+        '404':
+          {
+            description: Not found,
+            content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } },
+          }
 
     put:
       summary: Replace a todo
@@ -163,23 +222,47 @@ paths:
               type: object
               required: [title, done]
               properties:
-                title:    { type: string }
-                done:     { type: boolean }
+                title: { type: string }
+                done: { type: boolean }
                 priority: { type: string, enum: [low, medium, high] }
-                dueDate:  { type: string, nullable: true }
+                dueDate: { type: string, nullable: true }
       responses:
-        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/Todo' } } } }
-        '400': { description: Validation error, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
-        '401': { description: Unauthorized, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
-        '404': { description: Not found, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+        '200':
+          {
+            description: Updated,
+            content: { application/json: { schema: { $ref: '#/components/schemas/Todo' } } },
+          }
+        '400':
+          {
+            description: Validation error,
+            content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } },
+          }
+        '401':
+          {
+            description: Unauthorized,
+            content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } },
+          }
+        '404':
+          {
+            description: Not found,
+            content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } },
+          }
 
     delete:
       summary: Delete a todo
       security: [{ bearerAuth: [] }]
       responses:
         '204': { description: Deleted }
-        '401': { description: Unauthorized, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
-        '404': { description: Not found, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+        '401':
+          {
+            description: Unauthorized,
+            content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } },
+          }
+        '404':
+          {
+            description: Not found,
+            content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } },
+          }
 
   /todos/{id}/toggle:
     patch:
@@ -188,14 +271,34 @@ paths:
       parameters:
         - { name: id, in: path, required: true, schema: { type: integer } }
       responses:
-        '200': { description: Toggled, content: { application/json: { schema: { $ref: '#/components/schemas/Todo' } } } }
-        '401': { description: Unauthorized, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
-        '404': { description: Not found, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+        '200':
+          {
+            description: Toggled,
+            content: { application/json: { schema: { $ref: '#/components/schemas/Todo' } } },
+          }
+        '401':
+          {
+            description: Unauthorized,
+            content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } },
+          }
+        '404':
+          {
+            description: Not found,
+            content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } },
+          }
 
   /stats:
     get:
       summary: Get summary statistics for the authenticated user
       security: [{ bearerAuth: [] }]
       responses:
-        '200': { description: Stats, content: { application/json: { schema: { $ref: '#/components/schemas/Stats' } } } }
-        '401': { description: Unauthorized, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+        '200':
+          {
+            description: Stats,
+            content: { application/json: { schema: { $ref: '#/components/schemas/Stats' } } },
+          }
+        '401':
+          {
+            description: Unauthorized,
+            content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } },
+          }

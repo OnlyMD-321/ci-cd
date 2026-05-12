@@ -70,7 +70,11 @@ describe('POST /todos', () => {
   });
 
   it('rejects a request without a JSON body with 400', async () => {
-    const res = await request(app).post('/todos').set(auth()).set('Content-Type', 'text/plain').send('hello');
+    const res = await request(app)
+      .post('/todos')
+      .set(auth())
+      .set('Content-Type', 'text/plain')
+      .send('hello');
     expect(res.status).toBe(400);
   });
 
@@ -106,14 +110,20 @@ describe('GET /todos/:id', () => {
 describe('PUT /todos/:id', () => {
   it('updates title and done, returns 200', async () => {
     const created = await request(app).post('/todos').set(auth()).send({ title: 'a' });
-    const res = await request(app).put(`/todos/${created.body.id}`).set(auth()).send({ title: 'b', done: true });
+    const res = await request(app)
+      .put(`/todos/${created.body.id}`)
+      .set(auth())
+      .send({ title: 'b', done: true });
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({ title: 'b', done: true });
   });
 
   it('persists the update for subsequent GETs', async () => {
     const created = await request(app).post('/todos').set(auth()).send({ title: 'a' });
-    await request(app).put(`/todos/${created.body.id}`).set(auth()).send({ title: 'b', done: true });
+    await request(app)
+      .put(`/todos/${created.body.id}`)
+      .set(auth())
+      .send({ title: 'b', done: true });
     const res = await request(app).get(`/todos/${created.body.id}`).set(auth());
     expect(res.body).toMatchObject({ title: 'b', done: true });
   });

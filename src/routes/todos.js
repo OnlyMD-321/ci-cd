@@ -24,7 +24,7 @@ router.get('/', (req, res) => {
     return res.status(400).json({ error: "query 'done' must be 'true' or 'false'" });
   }
 
-  const page  = pageStr  !== undefined ? Number(pageStr)  : 1;
+  const page = pageStr !== undefined ? Number(pageStr) : 1;
   const limit = limitStr !== undefined ? Number(limitStr) : 10;
 
   if (!Number.isInteger(page) || page < 1) {

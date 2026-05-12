@@ -18,19 +18,25 @@ describe('auth — failure cases', () => {
     });
 
     it('rejects empty username with 400', async () => {
-      const res = await request(app).post('/auth/register').send({ username: '  ', password: 'secret123' });
+      const res = await request(app)
+        .post('/auth/register')
+        .send({ username: '  ', password: 'secret123' });
       expect(res.status).toBe(400);
     });
 
     it('rejects password shorter than 6 characters with 400', async () => {
-      const res = await request(app).post('/auth/register').send({ username: 'alice', password: '123' });
+      const res = await request(app)
+        .post('/auth/register')
+        .send({ username: 'alice', password: '123' });
       expect(res.status).toBe(400);
       expect(res.body.error).toMatch(/password/);
     });
 
     it('rejects duplicate username with 409', async () => {
       await request(app).post('/auth/register').send({ username: 'alice', password: 'secret123' });
-      const res = await request(app).post('/auth/register').send({ username: 'alice', password: 'different123' });
+      const res = await request(app)
+        .post('/auth/register')
+        .send({ username: 'alice', password: 'different123' });
       expect(res.status).toBe(409);
       expect(res.body.error).toMatch(/taken/);
     });
@@ -38,13 +44,17 @@ describe('auth — failure cases', () => {
 
   describe('POST /auth/login — invalid credentials', () => {
     it('rejects unknown username with 401', async () => {
-      const res = await request(app).post('/auth/login').send({ username: 'ghost', password: 'secret123' });
+      const res = await request(app)
+        .post('/auth/login')
+        .send({ username: 'ghost', password: 'secret123' });
       expect(res.status).toBe(401);
     });
 
     it('rejects wrong password with 401', async () => {
       await request(app).post('/auth/register').send({ username: 'alice', password: 'secret123' });
-      const res = await request(app).post('/auth/login').send({ username: 'alice', password: 'wrongpassword' });
+      const res = await request(app)
+        .post('/auth/login')
+        .send({ username: 'alice', password: 'wrongpassword' });
       expect(res.status).toBe(401);
       expect(res.body.error).toMatch(/Invalid credentials/);
     });

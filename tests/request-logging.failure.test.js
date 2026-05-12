@@ -1,5 +1,5 @@
 const express = require('express');
-const morgan  = require('morgan');
+const morgan = require('morgan');
 const request = require('supertest');
 
 describe('request-logging — failure cases', () => {

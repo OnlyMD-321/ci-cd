@@ -13,7 +13,11 @@ beforeEach(async () => {
 });
 
 const auth = () => ({ Authorization: `Bearer ${token}` });
-const post = (title, extra = {}) => request(app).post('/todos').set(auth()).send({ title, ...extra });
+const post = (title, extra = {}) =>
+  request(app)
+    .post('/todos')
+    .set(auth())
+    .send({ title, ...extra });
 
 describe('stats — use cases', () => {
   it('returns zeros when user has no todos', async () => {
@@ -24,7 +28,9 @@ describe('stats — use cases', () => {
   });
 
   it('total, done, and pending reflect created and toggled todos', async () => {
-    await post('a'); await post('b'); await post('c');
+    await post('a');
+    await post('b');
+    await post('c');
     const t = await post('d');
     await request(app).patch(`/todos/${t.body.id}/toggle`).set(auth());
     const res = await request(app).get('/stats').set(auth());
@@ -44,7 +50,7 @@ describe('stats — use cases', () => {
 
   it('overdue counts pending todos with dueDate in the past', async () => {
     await post('past due', { dueDate: '2000-01-01' });
-    await post('future',   { dueDate: '2099-12-31' });
+    await post('future', { dueDate: '2099-12-31' });
     await post('no date');
     const res = await request(app).get('/stats').set(auth());
     expect(res.body.overdue).toBe(1);
@@ -58,8 +64,13 @@ describe('stats — use cases', () => {
   });
 
   it('stats are per-user — does not include other users todos', async () => {
-    const other = await request(app).post('/auth/register').send({ username: 'bob', password: 'password123' });
-    await request(app).post('/todos').set('Authorization', `Bearer ${other.body.token}`).send({ title: 'bobs task' });
+    const other = await request(app)
+      .post('/auth/register')
+      .send({ username: 'bob', password: 'password123' });
+    await request(app)
+      .post('/todos')
+      .set('Authorization', `Bearer ${other.body.token}`)
+      .send({ title: 'bobs task' });
     const res = await request(app).get('/stats').set(auth());
     expect(res.body.total).toBe(0);
   });

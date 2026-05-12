@@ -11,7 +11,8 @@ describe('rate-limiting — failure cases', () => {
         max: 2,
         standardHeaders: true,
         legacyHeaders: false,
-        handler: (_req, res) => res.status(429).json({ error: 'Too many requests', retryAfter: 60 }),
+        handler: (_req, res) =>
+          res.status(429).json({ error: 'Too many requests', retryAfter: 60 }),
       }),
     );
     app.get('/ping', (_req, res) => res.json({ ok: true }));
@@ -32,7 +33,8 @@ describe('rate-limiting — failure cases', () => {
         max: 1,
         standardHeaders: true,
         legacyHeaders: false,
-        handler: (_req, res) => res.status(429).json({ error: 'Too many requests', retryAfter: 60 }),
+        handler: (_req, res) =>
+          res.status(429).json({ error: 'Too many requests', retryAfter: 60 }),
       }),
     );
     app.get('/ping', (_req, res) => res.json({ ok: true }));

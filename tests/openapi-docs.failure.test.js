@@ -1,6 +1,6 @@
 const request = require('supertest');
 const yaml = require('js-yaml');
-const fs   = require('fs');
+const fs = require('fs');
 const path = require('path');
 const { createApp } = require('../src/app');
 const store = require('../src/store');

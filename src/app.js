@@ -1,15 +1,15 @@
-const express    = require('express');
-const http       = require('http');
+const express = require('express');
+const http = require('http');
 const { Server } = require('socket.io');
-const swaggerUi  = require('swagger-ui-express');
-const yaml       = require('js-yaml');
-const morgan     = require('morgan');
-const rfs        = require('rotating-file-stream');
-const path       = require('path');
-const fs         = require('fs');
+const swaggerUi = require('swagger-ui-express');
+const yaml = require('js-yaml');
+const morgan = require('morgan');
+const rfs = require('rotating-file-stream');
+const path = require('path');
+const fs = require('fs');
 const rateLimit = require('express-rate-limit');
 const todosRouter = require('./routes/todos');
-const authRouter  = require('./routes/auth');
+const authRouter = require('./routes/auth');
 const statsRouter = require('./routes/stats');
 
 function buildLogger() {
@@ -31,8 +31,7 @@ const limiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skip: () => process.env.NODE_ENV === 'test',
-  handler: (_req, res) =>
-    res.status(429).json({ error: 'Too many requests', retryAfter: 15 * 60 }),
+  handler: (_req, res) => res.status(429).json({ error: 'Too many requests', retryAfter: 15 * 60 }),
 });
 
 function createApp() {
@@ -48,7 +47,7 @@ function createApp() {
 
   app.use(express.static(path.join(__dirname, '..', 'public')));
   app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc));
-  app.use('/auth',  authRouter);
+  app.use('/auth', authRouter);
   app.use('/todos', todosRouter);
   app.use('/stats', statsRouter);
 
