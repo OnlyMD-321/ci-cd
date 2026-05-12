@@ -107,7 +107,7 @@ describe('PUT /todos/:id', () => {
       .put(`/todos/${created.body.id}`)
       .send({ title: 'b', done: true });
     expect(res.status).toBe(200);
-    expect(res.body).toEqual({ id: created.body.id, title: 'b', done: true });
+    expect(res.body).toMatchObject({ id: created.body.id, title: 'b', done: true });
   });
 
   it('persists the update for subsequent GETs', async () => {
@@ -115,7 +115,7 @@ describe('PUT /todos/:id', () => {
     const created = await request(app).post('/todos').send({ title: 'a' });
     await request(app).put(`/todos/${created.body.id}`).send({ title: 'b', done: true });
     const res = await request(app).get(`/todos/${created.body.id}`);
-    expect(res.body).toEqual({ id: created.body.id, title: 'b', done: true });
+    expect(res.body).toMatchObject({ id: created.body.id, title: 'b', done: true });
   });
 
   it('returns 404 when the id does not exist', async () => {

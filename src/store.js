@@ -1,14 +1,28 @@
 const db = require('./db');
 
-const row2todo = (r) => (r ? { id: r.id, title: r.title, done: r.done === 1 } : undefined);
+const PRIORITIES = ['low', 'medium', 'high'];
+
+const row2todo = (r) =>
+  r
+    ? {
+        id: r.id,
+        title: r.title,
+        done: r.done === 1,
+        priority: r.priority,
+        dueDate: r.dueDate ?? null,
+        createdAt: r.createdAt,
+      }
+    : undefined;
 
 function list() {
   return db.prepare('SELECT * FROM todos ORDER BY id').all().map(row2todo);
 }
 
-function create({ title }) {
+function create({ title, priority = 'medium', dueDate = null }) {
   const createdAt = new Date().toISOString();
-  const info = db.prepare('INSERT INTO todos (title, done, createdAt) VALUES (?, 0, ?)').run(title, createdAt);
+  const info = db
+    .prepare('INSERT INTO todos (title, done, priority, dueDate, createdAt) VALUES (?, 0, ?, ?, ?)')
+    .run(title, priority, dueDate, createdAt);
   return row2todo(db.prepare('SELECT * FROM todos WHERE id = ?').get(info.lastInsertRowid));
 }
 
@@ -16,8 +30,10 @@ function get(id) {
   return row2todo(db.prepare('SELECT * FROM todos WHERE id = ?').get(id));
 }
 
-function update(id, { title, done }) {
-  const info = db.prepare('UPDATE todos SET title = ?, done = ? WHERE id = ?').run(title, done ? 1 : 0, id);
+function update(id, { title, done, priority, dueDate }) {
+  const info = db
+    .prepare('UPDATE todos SET title = ?, done = ?, priority = ?, dueDate = ? WHERE id = ?')
+    .run(title, done ? 1 : 0, priority, dueDate ?? null, id);
   if (info.changes === 0) return undefined;
   return row2todo(db.prepare('SELECT * FROM todos WHERE id = ?').get(id));
 }
@@ -37,4 +53,4 @@ function clear() {
   db.prepare("DELETE FROM sqlite_sequence WHERE name = 'todos'").run();
 }
 
-module.exports = { list, create, get, update, remove, toggle, clear };
+module.exports = { list, create, get, update, remove, toggle, clear, PRIORITIES };
