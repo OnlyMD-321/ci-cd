@@ -1,4 +1,6 @@
 const express    = require('express');
+const http       = require('http');
+const { Server } = require('socket.io');
 const swaggerUi  = require('swagger-ui-express');
 const yaml       = require('js-yaml');
 const morgan     = require('morgan');
@@ -44,6 +46,7 @@ function createApp() {
     res.json({ status: 'ok' });
   });
 
+  app.use(express.static(path.join(__dirname, '..', 'public')));
   app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc));
   app.use('/auth',  authRouter);
   app.use('/todos', todosRouter);
@@ -52,4 +55,12 @@ function createApp() {
   return app;
 }
 
-module.exports = { createApp };
+const emitter = require('./emitter');
+
+function createIo(server) {
+  const io = new Server(server, { cors: { origin: '*' } });
+  emitter.on('todos:update', () => io.emit('todos:update'));
+  return io;
+}
+
+module.exports = { createApp, createIo };

@@ -1,6 +1,7 @@
 const express = require('express');
 const store = require('../store');
 const { requireAuth } = require('../middleware/auth');
+const emitter = require('../emitter');
 
 const router = express.Router();
 
@@ -49,6 +50,7 @@ router.post('/', (req, res) => {
     return res.status(400).json({ error: 'dueDate must be an ISO 8601 date string or null' });
   }
   const todo = store.create({ title: title.trim(), priority, dueDate, userId: req.user.id });
+  emitter.emit('todos:update');
   return res.status(201).json(todo);
 });
 
@@ -80,6 +82,7 @@ router.put('/:id', (req, res) => {
     req.user.id,
   );
   if (!updated) return res.status(404).json({ error: 'todo not found' });
+  emitter.emit('todos:update');
   return res.json(updated);
 });
 
@@ -87,6 +90,7 @@ router.delete('/:id', (req, res) => {
   const id = Number(req.params.id);
   const removed = store.remove(id, req.user.id);
   if (!removed) return res.status(404).json({ error: 'todo not found' });
+  emitter.emit('todos:update');
   return res.status(204).end();
 });
 
@@ -94,6 +98,7 @@ router.patch('/:id/toggle', (req, res) => {
   const id = Number(req.params.id);
   const todo = store.toggle(id, req.user.id);
   if (!todo) return res.status(404).json({ error: 'todo not found' });
+  emitter.emit('todos:update');
   return res.json(todo);
 });
 
