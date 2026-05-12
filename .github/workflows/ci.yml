@@ -36,13 +36,7 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - name: Run use-case tests
-        run: npm test -- --testPathPattern="health|todos|usecase" --coverage --coverageReporters=text-summary
-      - name: Upload use-case coverage
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-usecase
-          path: coverage/
+        run: npm test -- --testPathPattern="health|todos|usecase"
 
   # ── 3. Failure tests (error / rejection paths) ──────────────────
   test-failure:
@@ -71,6 +65,13 @@ jobs:
           node-version: '20'
           cache: 'npm'
       - run: npm ci
+      - name: Coverage (full suite)
+        run: npm test -- --coverage --coverageReporters=text-summary
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/
       - name: Build bundle
         run: npm run build
       - name: Upload dist artifact
