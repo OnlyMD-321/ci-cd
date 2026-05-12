@@ -89,7 +89,9 @@ function clear() {
   for (const t of ['todos', 'users']) {
     try {
       db.prepare(`DELETE FROM sqlite_sequence WHERE name = ?`).run(t);
-    } catch (_) {}
+    } catch {
+      // sqlite_sequence table may not exist if no autoincrement rows were inserted
+    }
   }
 }
 

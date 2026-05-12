@@ -1,5 +1,4 @@
 const express = require('express');
-const http = require('http');
 const { Server } = require('socket.io');
 const swaggerUi = require('swagger-ui-express');
 const yaml = require('js-yaml');
